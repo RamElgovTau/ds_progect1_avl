@@ -1,2 +1,2 @@
-# ds_progect1_avl
+# ds_project1_avl
 avl tree implementation in java
