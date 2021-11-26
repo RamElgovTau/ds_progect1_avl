@@ -27,22 +27,21 @@ public class AVLTree {
      * otherwise, returns null.
      */
     public String search(int k) {
-        return search(root,k);
+        IAVLNode result = treePosition(this.root, k);
+        return result.isRealNode()? result.getValue() : null;
     }
-
-    private String search(IAVLNode root, int k) {
-        if (!root.isRealNode() || root.getKey() == k)
-        {
-            return root.getValue();
+    private IAVLNode treePosition(IAVLNode root, int k) {
+        IAVLNode node = root;
+        while (node.isRealNode()) {
+            if (k == node.getKey()) {
+                return node;
+            } else if (k < node.getKey()) {
+                node = node.getLeft();
+            } else {
+                node = node.getRight();
+            }
         }
-        if (k < root.getKey())
-        {
-            return search(root.getLeft(),k);
-        }
-        else
-        {
-            return search(root.getRight(),k);
-        }
+        return node;
     }
 
     /**
@@ -164,7 +163,7 @@ public class AVLTree {
         return -1;
     }
     private IAVLNode createVirtualNode(IAVLNode parent) {
-        return new AVLNode(parent, AVLNode.EXTERNAL_LEAF_KEY, null, false);
+        return new AVLNode(parent, AVLNode.VIRTUAL_NODE_KEY, null, false);
     }
     /**
      * public interface IAVLNode
@@ -193,15 +192,15 @@ public class AVLTree {
      * This class can and MUST be modified (It must implement IAVLNode).
      */
     public class AVLNode implements IAVLNode {
-        private static final int EXTERNAL_LEAF_KEY = -1;
-        private static final String EXTERNAL_LEAF_VALUE = null;
-        private static final int EXTERNAL_LEAF_Rank = -1;
+        private static final int VIRTUAL_NODE_KEY = -1;
+        private static final String VIRTUAL_NODE_VALUE = null;
+        private static final int VIRTUAL_NODE_RANK = -1;
+        private static final int VIRTUAL_NODE_HEIGHT = -1;
         private String info;
         private int key, size;
         private IAVLNode left, right, parent;
         private int height;
         private int rank;
-        private boolean realNode;
 
         public AVLNode(IAVLNode parent, int key, String info) {
             this.parent = parent;
@@ -220,7 +219,7 @@ public class AVLTree {
                 this.right = createVirtualNode(this);
                 this.left = createVirtualNode(this);
             } else {
-                this.rank = EXTERNAL_LEAF_Rank;
+                this.rank = VIRTUAL_NODE_RANK;
                 this.size = 0;
             }
         }
@@ -250,15 +249,68 @@ public class AVLTree {
             return this.parent;
         }
         public boolean isRealNode() {
-            return this.realNode;
+            return this.rank != VIRTUAL_NODE_RANK;
         }
         public void setHeight(int height) {
             this.height = height;
         }
-        public int getHeight()
-        {
+        public int getHeight() {
             return isRealNode()? Math.max(this.left.getHeight(), this.right.getHeight()) + 1 : -1; // to be replaced by student code
         }
+
+
+        /**
+         *
+         * @return true if this node is a left child, false if it is a right child.
+         */
+        public boolean isLeftChild() {
+            return parent != null && parent.getKey() > this.key;
+        }
+        /**
+         *
+         * @return true if this node is a leaf, false otherwise.
+         */
+        public boolean isLeaf() {
+            return (!this.left.isRealNode()) && (!this.right.isRealNode());
+        }
+
+        /**
+         *
+         * @return successor of this node.
+         */
+        public IAVLNode successor() {
+            AVLNode node;
+            if(this.right.isRealNode()) {  // if this node has right child
+                node = (AVLNode) this.right;
+                while (node.getLeft().isRealNode()) {
+                    node = (AVLNode) node.getLeft();
+                }
+            } else {  // this does not have a right child, walk up to successor.
+                node = this;
+                while (node.getParent() != null && !node.isLeftChild()) {
+                    node = (AVLNode) node.getParent();
+                }
+                node = (AVLNode) node.getParent();
+            }
+            return node;
+        }
+
+        /**
+         * replace parents of two nodes.
+         * @param node to replace parent with.
+         */
+        public void replaceParentsWith(IAVLNode node) {
+            if (this.parent != null) {
+                if (this.isLeftChild()) {
+                    this.parent.setLeft(node);
+                } else {
+                    this.parent.setRight(node);
+                }
+            } else {
+                AVLTree.this.root = node;
+            }
+        }
+
     }
 }
 
