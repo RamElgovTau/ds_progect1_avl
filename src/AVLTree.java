@@ -2,21 +2,22 @@
  *
  * AVLTree
  *
- * An implementation of aמ AVL Tree with
+ * An implementation of an AVL Tree with
  * distinct integer keys and info.
  *
  */
 
 public class AVLTree {
-
+    private IAVLNode root;
     /**
      * public boolean empty()
      *
      * Returns true if and only if the tree is empty.
      *
      */
-    public boolean empty() {
-        return false; // to be replaced by student code
+    public boolean empty()
+    {
+        return !root.isRealNode(); // to be replaced by student code
     }
 
     /**
@@ -25,9 +26,23 @@ public class AVLTree {
      * Returns the info of an item with key k if it exists in the tree.
      * otherwise, returns null.
      */
-    public String search(int k)
-    {
-        return "searchDefaultString";  // to be replaced by student code
+    public String search(int k) {
+        return search(root,k);
+    }
+
+    private String search(IAVLNode root, int k) {
+        if (!root.isRealNode() || root.getKey() == k)
+        {
+            return root.getValue();
+        }
+        if (k < root.getKey())
+        {
+            return search(root.getLeft(),k);
+        }
+        else
+        {
+            return search(root.getRight(),k);
+        }
     }
 
     /**
@@ -52,8 +67,7 @@ public class AVLTree {
      * A promotion/rotation counts as one re-balance operation, double-rotation is counted as 2.
      * Returns -1 if an item with key k was not found in the tree.
      */
-    public int delete(int k)
-    {
+    public int delete(int k) {
         return 421;	// to be replaced by student code
     }
 
@@ -149,7 +163,9 @@ public class AVLTree {
     {
         return -1;
     }
-
+    private IAVLNode createVirtualNode(IAVLNode parent) {
+        return new AVLNode(parent, AVLNode.EXTERNAL_LEAF_KEY, null, false);
+    }
     /**
      * public interface IAVLNode
      * ! Do not delete or modify this - otherwise all tests will fail !
@@ -176,52 +192,73 @@ public class AVLTree {
      *
      * This class can and MUST be modified (It must implement IAVLNode).
      */
-    public class AVLNode implements IAVLNode{
-        public int getKey()
-        {
-            return 423; // to be replaced by student code
+    public class AVLNode implements IAVLNode {
+        private static final int EXTERNAL_LEAF_KEY = -1;
+        private static final String EXTERNAL_LEAF_VALUE = null;
+        private static final int EXTERNAL_LEAF_Rank = -1;
+        private String info;
+        private int key, size;
+        private IAVLNode left, right, parent;
+        private int height;
+        private int rank;
+        private boolean realNode;
+
+        public AVLNode(IAVLNode parent, int key, String info) {
+            this.parent = parent;
+            this.key = key;
+            this.info = info;
         }
-        public String getValue()
-        {
-            return "getValueDefault"; // to be replaced by student code
+
+        public AVLNode(IAVLNode parent, int key, String info, boolean realNode) {
+            this.parent = parent;
+            this.key = key;
+            this.info = info;
+
+            if (realNode) {
+                this.rank = 0;
+                this.size = 1;
+                this.right = createVirtualNode(this);
+                this.left = createVirtualNode(this);
+            } else {
+                this.rank = EXTERNAL_LEAF_Rank;
+                this.size = 0;
+            }
         }
-        public void setLeft(IAVLNode node)
-        {
-            return; // to be replaced by student code
+
+        public int getKey() {
+            return this.key;
         }
-        public IAVLNode getLeft()
-        {
-            return null; // to be replaced by student code
+        public String getValue() {
+            return this.info;
         }
-        public void setRight(IAVLNode node)
-        {
-            return; // to be replaced by student code
+        public void setLeft(IAVLNode node) {
+            this.left = node;
         }
-        public IAVLNode getRight()
-        {
-            return null; // to be replaced by student code
+        public IAVLNode getLeft() {
+            return this.left;
         }
-        public void setParent(IAVLNode node)
-        {
-            return; // to be replaced by student code
+        public void setRight(IAVLNode node) {
+            this.right = node;
         }
-        public IAVLNode getParent()
-        {
-            return null; // to be replaced by student code
+        public IAVLNode getRight() {
+            return this.right;
         }
-        public boolean isRealNode()
-        {
-            return true; // to be replaced by student code
+        public void setParent(IAVLNode node) {
+            this.parent = node;
         }
-        public void setHeight(int height)
-        {
-            return; // to be replaced by student code
+        public IAVLNode getParent() {
+            return this.parent;
+        }
+        public boolean isRealNode() {
+            return this.realNode;
+        }
+        public void setHeight(int height) {
+            this.height = height;
         }
         public int getHeight()
         {
-            return 424; // to be replaced by student code
+            return isRealNode()? Math.max(this.left.getHeight(), this.right.getHeight()) + 1 : -1; // to be replaced by student code
         }
     }
-
 }
 
